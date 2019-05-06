@@ -5,7 +5,8 @@ var i18n = {
 			"doubles" : "Doubles",
 			"logOut" : "Log Out",
 			"settings" : "Settings",
-			"singles" : "Singles"
+			"singles" : "Singles",
+			"games" : "Games"
 		},
 		"global" : {
 			"nextButton" : "Next tab"
@@ -31,7 +32,8 @@ var i18n = {
 			"playerStatusUpdated" : "Player Status Updated",
 			"playerUpdated" : "Player Updated",
 			"scoreBoth" : "Enter a score for both teams",
-			"undo" : "Undo"
+			"undo" : "Undo",
+			"matchTypeUpdated" : "Match Types Updated",
 		},
 		"playersRow" : {
 			"deleteLink" : "Delete"
@@ -53,7 +55,12 @@ var i18n = {
 			"gameTableTennis" : "Table Tennis",
 			"language" : "Language",
 			"orgName" : "What is the name of your organization",
-			"whatGame" : "What game will you be playing"
+			"whatGame" : "What game will you be playing",
+			"whatMatchType" : "What matches do you want to track",
+			"matchTypeSingles" : "Singles",
+			"matchTypeDoubles" : "Doubles",
+			"matchTypeBoth" : "Both",
+
 		},
 		"settingsColors" : {
 			"highlightColor" : "Highlight color",
@@ -89,8 +96,12 @@ var i18n = {
 			"gamesLost" : "Games lost",
 			"gamesPlayed" : "Games played",
 			"gamesWon" : "Games won",
+			"winPercentage" : "Win percentage",
 			"ranking" : "Ranking",
 			"singles" : "Singles"
+		},
+		"games" : {
+			"gameHistory" : "Game History"
 		}
 	},
 	"index" : {

@@ -27,6 +27,13 @@
 			<div class="top-rankings"></div>
 			<div class="rankings"></div>
 		</div>
+		<div class="games-history">
+			<!-- <div class="games-history-container"><table class="games-history-table"></table></div> -->
+			<div class="games-history-games">
+				<ul></ul>
+			</div>
+		</div>
+		</div>
 	</div>
 	<div class="modal-backdrop show">
 		<div class="modal"></div>
@@ -47,8 +54,9 @@
 			<span class="game-type"></span>
 		</div>
 		<div class="header-block">
-			<a href="#" class="singles-toggle ranking-toggle c-button c-button--md is-selected" tabindex="-1" data-view="singles"><%=singles%></a>
-			<a href="#" class="doubles-toggle ranking-toggle c-button c-button--md" data-view="doubles"><%=doubles%></a>
+			<a href="#" class="singles-toggle active-tab-toggle c-button c-button--md is-selected" tabindex="-1" data-view="singles"><%=singles%></a>
+			<a href="#" class="doubles-toggle active-tab-toggle c-button c-button--md" data-view="doubles"><%=doubles%></a>
+			<a href="#" class="active-tab-toggle c-button c-button--md games" data-view="games-history"><%=games%></a>
 			<a href="#" class="c-button c-button--link settings"><%=settings%></a>
 			<a href="#" class="c-button c-button--link logout"><%=logOut%></a>
 		</div>
@@ -147,12 +155,18 @@
 					<label for="game5"><input type="radio" name="gameType" id="game5" value="table-tennis"> <span><%=gameTableTennis%></span></label>
 				</div>
 				<div class="control">
+					<strong><%=whatMatchType%>?</strong>
+					<label for="matchType1"><input type="radio" name="matchType" id="matchType1" value="singles"> <span><%=matchTypeSingles%></span></label>
+					<label for="matchType2"><input type="radio" name="matchType" id="matchType2" value="doubles"> <span><%=matchTypeDoubles%></span></label>
+					<label for="matchType3"><input type="radio" name="matchType" id="matchType3" value="both"> <span><%=matchTypeBoth%></span></label>
+				</div>
+				<div class="control">
 					<strong><%=language%></strong>
 					<select class="lang">
-						<option value="da">dansk</option>
-						<option value="de">Deutsche</option>
+						<!-- <option value="da">dansk</option>
+						<option value="de">Deutsche</option> -->
 						<option value="en">English</option>
-						<option value="es">Español</option>
+						<!-- <option value="es">Español</option>
 						<option value="fr">français</option>
 						<option value="hi">हिंदी</option>
 						<option value="id">bahasa Indonesia</option>
@@ -162,7 +176,7 @@
 						<option value="pt">Português</option>
 						<option value="ru">русский</option>
 						<option value="sv">svenska</option>
-						<option value="zh">中文</option>
+						<option value="zh">中文</option> -->
 					</select>
 				</div>
 				<div class="control">
@@ -226,6 +240,7 @@
 				<div class="control">
 					<a href="#" class="players-add-link"><%=addPlayers%></a>
 					<table class="players-list"></table>
+					<table class="players-list-inactive"></table>
 				</div>
 				<div class="control">
 					<a href="#" class="next c-button c-button--md c-button--primary"><%=nextButton%></a>
@@ -269,32 +284,40 @@
 	<script type="text/html" id="statsPlayer">
 		<tr class="table-header">
 			<th></th>
-			<th><%=singles%></th>
-			<th><%=doubles%></th>
+			<th class="stats-singles-col"><%=singles%></th>
+			<th class="stats-doubles-col"><%=doubles%></th>
 		</tr>
 		<tr>
 			<th><%=gamesPlayed%></th>
-			<td><%=singles_played%></td>
-			<td><%=doubles_played%></td>
+			<td class="stats-singles-col"><%=singles_played%></td>
+			<td class="stats-doubles-col"><%=doubles_played%></td>
 		</tr>
 		<tr>
 			<th><%=gamesWon%></th>
-			<td><%=singles_won%></td>
-			<td><%=doubles_won%></td>
+			<td class="stats-singles-col"><%=singles_won%></td>
+			<td class="stats-doubles-col"><%=doubles_won%></td>
 		</tr>
 		<tr>
 			<th><%=gamesLost%></th>
-			<td><%=singles_lost%></td>
-			<td><%=doubles_lost%></td>
+			<td class="stats-singles-col"><%=singles_lost%></td>
+			<td class="stats-doubles-col"><%=doubles_lost%></td>
+		</tr>
+		<tr>
+			<th><%=winPercentage%></th>
+			<td class="stats-singles-col"><%=singles_win_percentage%>%</td>
+			<td class="stats-doubles-col"><%=doubles_win_percentage%>%</td>
 		</tr>
 		<tr>
 			<th><%=ranking%></th>
-			<td><%=singles_rank%></td>
-			<td><%=doubles_rank%></td>
+			<td class="stats-singles-col"><%=singles_rank%></td>
+			<td class="stats-doubles-col"><%=doubles_rank%></td>
 		</tr>
 	</script>
 	<script type="text/html" id="statsPlayerGames">
 		<li><strong class="<%=status%>"><%=status%></strong> <%=t1%> (<%=t1Score%>) vs. <%=t2%> (<%=t2Score%>)</li>
+	</script>
+	<script type="text/html" id="gamesHistory">
+        <li><strong class="<%=dateClass%>"><%=date%></strong><%=t1%> <strong>(<%=t1Score%>)</strong> vs. <%=t2%> <strong>(<%=t2Score%>)</strong></li>
 	</script>
 	<script type="text/html" id="cssBlock">
 		<style>
@@ -303,20 +326,20 @@
 			.modal { background: <%=c0%>; }
 			.color-tx-0,
 			.c-button:active,
-  			.c-button:focus,
-  			.c-button:hover,
-  			.c-button.is-selected,
-  			.ranking,
-  			.top-rankings .movement,
-  			.top-rankings .rank,
-  			.top-rankings .ranking,
-  			header .name,
-  			.movement-positive { color: <%=c0%> }
+			.c-button:focus,
+			.c-button:hover,
+			.c-button.is-selected,
+			.ranking,
+			.top-rankings .movement,
+			.top-rankings .rank,
+			.top-rankings .ranking,
+			header .name,
+			.movement-positive { color: <%=c0%> }
 
-  			/* Color 1 */
+			/* Color 1 */
 			.c-button,
 			.color-tx-1 { color: <%=c1%>; }
-  			.ranking:focus,
+			.ranking:focus,
 			.ranking:hover { border-color: <%=c1%>; }
 
 			/* Color 2 */
@@ -351,33 +374,33 @@
 			body { background: <%=c4%>; }
 
 			/* Links */
-			.c-button--link { 
-  				background: transparent;
-  				border: transparent;
-  				color: <%=c1%>;
-  			}
-  			.c-button--link:active,
-  			.c-button--link:focus,
-  			.c-button--link:hover { 
-  				background: transparent;
-  				border: transparent;
-  				color: <%=c0%>;
-  			}
-  			
+			.c-button--link {
+				background: transparent;
+				border: transparent;
+				color: <%=c1%>;
+			}
+			.c-button--link:active,
+			.c-button--link:focus,
+			.c-button--link:hover {
+				background: transparent;
+				border: transparent;
+				color: <%=c0%>;
+			}
+
 			/* Primary */
-  			.c-button--primary { 
-  				background: transparent;
-  				border-color: <%=c5%>;
-  				color: <%=c5%>;
-  			}
-  			.c-button--primary:active,
-  			.c-button--primary:focus,
-  			.c-button--primary:hover {
-  				background: <%=c5%>;
-  				border-color: <%=c5%>;
-  				color: <%=c0%>;
-  				text-decoration: none;
-  			}
+			.c-button--primary {
+				background: transparent;
+				border-color: <%=c5%>;
+				color: <%=c5%>;
+			}
+			.c-button--primary:active,
+			.c-button--primary:focus,
+			.c-button--primary:hover {
+				background: <%=c5%>;
+				border-color: <%=c5%>;
+				color: <%=c0%>;
+				text-decoration: none;
+			}
 		</style>
 	</script>
 </body>
