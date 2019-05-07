@@ -739,22 +739,42 @@
                             // Add game id to gameIds
                             gameIds.push(currentGameEntry.game);
 
-                            // TODO: figure out what to do with deleted players
-                            //       At least add a check that shows ("deleted player")
-                            //       for now. Eventually, I'd like "deleted" players
-                            //       to just become inactive from future games
-                            gamesData.push({
-                                "dt" : currentGameEntry.dt,
-                                // "key" : playerGameKey,
-                                "game" : currentGameEntry.game,
-                                "t1p1" : localData.playersByKey[currentGameEntry.t1p1] || '',
-                                "t1p2" : localData.playersByKey[currentGameEntry.t1p2] || '',
-                                "t2p1" : localData.playersByKey[currentGameEntry.t2p1] || '',
-                                "t2p2" : localData.playersByKey[currentGameEntry.t2p2] || '',
-                                "t1_points" : currentGameEntry.t1_points,
-                                "t2_points" : currentGameEntry.t2_points,
-                                // "won" : currentGameEntry.won
-                            });
+                            if(typeof currentGameEntry.t1p2 !== 'undefined') {
+                                // TODO: figure out what to do with deleted players
+                                //       At least add a check that shows ("deleted player")
+                                //       for now. Eventually, I'd like "deleted" players
+                                //       to just become inactive from future games
+                                gamesData.push({
+                                    "dt" : currentGameEntry.dt,
+                                    // "key" : playerGameKey,
+                                    "game" : currentGameEntry.game,
+                                    "t1p1" : localData.playersByKey[currentGameEntry.t1p1] || '',
+                                    "t1p2" : localData.playersByKey[currentGameEntry.t1p2] || '',
+                                    "t2p1" : localData.playersByKey[currentGameEntry.t2p1] || '',
+                                    "t2p2" : localData.playersByKey[currentGameEntry.t2p2] || '',
+                                    "t1_points" : currentGameEntry.t1_points,
+                                    "t2_points" : currentGameEntry.t2_points,
+                                    "doubles"   : true,
+                                    // "won" : currentGameEntry.won
+                                });
+                            }
+                            else {
+                                // TODO: figure out what to do with deleted players
+                                //       At least add a check that shows ("deleted player")
+                                //       for now. Eventually, I'd like "deleted" players
+                                //       to just become inactive from future games
+                                gamesData.push({
+                                    "dt" : currentGameEntry.dt,
+                                    // "key" : playerGameKey,
+                                    "game" : currentGameEntry.game,
+                                    "t1p1" : localData.playersByKey[currentGameEntry.t1p1] || '',
+                                    "t2p1" : localData.playersByKey[currentGameEntry.t2p1] || '',
+                                    "t1_points" : currentGameEntry.t1_points,
+                                    "t2_points" : currentGameEntry.t2_points,
+                                    "doubles"   : false,
+                                    // "won" : currentGameEntry.won
+                                });                                
+                            }
                         }
                     }
                 }
@@ -784,16 +804,31 @@
                     //}
                     
                     // TODO: make this safe for singles games
-                    if (game.t1_points > game.t2_points) {
-                        winTeam = game.t1p1.name + ' & ' + game.t1p2.name;
-                        winPoints = game.t1_points;
-                        loseTeam = game.t2p1.name + ' & ' + game.t2p2.name;
-                        losePoints = game.t2_points;
-                    } else {
-                        loseTeam = game.t1p1.name + ' & ' + game.t1p2.name;
-                        losePoints = game.t1_points;
-                        winTeam = game.t2p1.name + ' & ' + game.t2p2.name;
-                        winPoints = game.t2_points;
+                    if(game.doubles == true) {
+                        if (game.t1_points > game.t2_points) {
+                            winTeam = game.t1p1.name + ' & ' + game.t1p2.name;
+                            winPoints = game.t1_points;
+                            loseTeam = game.t2p1.name + ' & ' + game.t2p2.name;
+                            losePoints = game.t2_points;
+                        } else {
+                            loseTeam = game.t1p1.name + ' & ' + game.t1p2.name;
+                            losePoints = game.t1_points;
+                            winTeam = game.t2p1.name + ' & ' + game.t2p2.name;
+                            winPoints = game.t2_points;
+                        }
+                    }   
+                    else {
+                        if (game.t1_points > game.t2_points) {
+                            winTeam = game.t1p1.name;
+                            winPoints = game.t1_points;
+                            loseTeam = game.t2p1.name;
+                            losePoints = game.t2_points;
+                        } else {
+                            loseTeam = game.t1p1.name;
+                            losePoints = game.t1_points;
+                            winTeam = game.t2p1.name;
+                            winPoints = game.t2_points;
+                        }
                     }
                     // console.log(winTeam + '(' + winPoints + ') ' + loseTeam + '(' + losePoints + ')');
                     var date = new Date(game.dt);
@@ -814,9 +849,9 @@
                         "date": dateF,
                         "dateClass": dateClass,
                         "t1" : winTeam,
-                        "t1Score" : winPoints,
+                        "t1Score" : parseInt(winPoints),
                         "t2" : loseTeam,
-                        "t2Score" : losePoints
+                        "t2Score" : parseInt(losePoints)
                     });
                     $('.games-history .games-history-games ul').html(gameHistoryHtlm);
                     previousDayOfWeek = date.getDay();
@@ -825,6 +860,11 @@
         });
 
     }
+
+    function eloProbability(p1, p2) {
+        return 1.0 * 1.0 / (1 + 1.0 * Math.pow(10, 1.0 * (p1 - p2) / 400)); 
+    }
+
     // ---------------------------------------------------
     // Scoring
     // ---------------------------------------------------
@@ -861,6 +901,13 @@
             console.log(isDoubles);
             console.log('----');
         }
+        var t1p1_points = localData.playersByKey[t1p1Key].doubles_points;
+        var t2p1_points = localData.playersByKey[t2p1Key].doubles_points;
+
+        if(isDoubles) {
+            var t1p2_points = localData.playersByKey[t1p2Key].doubles_points;
+            var t2p2_points = localData.playersByKey[t2p2Key].doubles_points;
+        }
         // Team ranking points
         var t1rp = localData.playersByKey[t1p1Key].singles_points;
         var t2rp = localData.playersByKey[t2p1Key].singles_points;
@@ -878,54 +925,52 @@
             }
             console.log('----');
         }
-        // Game ranking points
-        var grp = [t1rp + t2rp] / 2;
-        if (logging) {
-            console.log('Game ranking points');
-            console.log(grp);
-            console.log('----');
+
+        // define k constant
+        var k = 32;
+        var prob_team1 = eloProbability(t2rp, t1rp);
+        var prob_team2 = eloProbability(t1rp, t2rp);
+
+        if(isDoubles) {
+            // team 1 wins
+            if (parseInt(t1s) > parseInt(t2s)) {
+                var newt1p1 = t1p1_points+k*(1-prob_team1);
+                var newt1p2 = t1p2_points+k*(1-prob_team1);
+                var newt2p1 = t2p1_points+k*(0-prob_team2);
+                var newt2p2 = t2p2_points+k*(0-prob_team2);
+            }
+            else {
+                var newt1p1 = t1p1_points+k*(1-prob_team1);
+                var newt2p1 = t2p1_points+k*(0-prob_team2)
+            }
         }
-        // Team points
-        var t1p = grp + [t1s - t2s] * 100 / Math.max(t1s, t2s);
-        var t2p = grp + [t2s - t1s] * 100 / Math.max(t1s, t2s);
+        else {
+            // team 1 wins
+            if (parseInt(t1s) > parseInt(t2s)) {
+                var newt1p1 = t1rp+k*(1-prob_team1);
+                var newt2p1 = t2rp+k*(0-prob_team2);
+            }
+            else {
+                var newt1p1 = t1rp+k*(0-prob_team1);
+                var newt2p1 = t2rp+k*(1-prob_team2);
+            }
+        }
         if (logging) {
             console.log('Team points');
-            console.log(t1p);
-            console.log(t2p);
+            console.log(newt1p1);
+            console.log(newt1p2);
             console.log('----');
         }
         // Player ranking points
         var gameData = {
             "dt": Date.now(),
-            "t1p1_points": t1p,
-            "t2p1_points": t2p
+            "t1p1_points": newt1p1,
+            "t2p1_points": newt1p2
         }
         if (logging) {
-            console.log('Singles Player ranking points');
+            console.log('Update ranking points');
             console.log(gameData);
             console.log('----');
-        }
-        if (isDoubles) {
-            var t1p1rp = t1p + [localData.playersByKey[t1p1Key].doubles_points - localData.playersByKey[t1p2Key].doubles_points] / 2;
-            var t1p2rp = 2 * t1p - t1p1rp;
-            var t2p1rp = t2p + [localData.playersByKey[t2p1Key].doubles_points - localData.playersByKey[t2p2Key].doubles_points] / 2;
-            var t2p2rp = 2 * t2p - t2p1rp;
-            gameData = {
-                "dt": Date.now(),
-                "t1p1_points": t1p1rp,
-                "t1p2_points": t1p2rp,
-                "t2p1_points": t2p1rp,
-                "t2p2_points": t2p2rp
-            }
-            if (logging) {
-                console.log('Doubles Player ranking points');
-                console.log(t1p1rp);
-                console.log(t1p2rp);
-                console.log(t2p1rp);
-                console.log(t2p2rp);
-                console.log(gameData);
-                console.log('----');
-            }
         }
         // Save "games" data
         var newGameKey = fbdb.ref().child('games').push().key;
@@ -952,16 +997,11 @@
         var decay_factor = 10;
         // New player ranking points
         if (isDoubles) {
-            // New doubles player points
-            var t1p1PointsNew = localData.playersByKey[t1p1Key].doubles_points / decay_factor * [decay_factor - 1] + t1p1rp / decay_factor;
-            var t1p2PointsNew = localData.playersByKey[t1p2Key].doubles_points / decay_factor * [decay_factor - 1] + t1p2rp / decay_factor;
-            var t2p1PointsNew = localData.playersByKey[t2p1Key].doubles_points / decay_factor * [decay_factor - 1] + t2p1rp / decay_factor;
-            var t2p2PointsNew = localData.playersByKey[t2p2Key].doubles_points / decay_factor * [decay_factor - 1] + t2p2rp / decay_factor;
             // Update last movements
-            var t1p1LastMovement = t1p1PointsNew - localData.playersByKey[t1p1Key].doubles_points;
-            var t1p2LastMovement = t1p2PointsNew - localData.playersByKey[t1p2Key].doubles_points;
-            var t2p1LastMovement = t2p1PointsNew - localData.playersByKey[t2p1Key].doubles_points;
-            var t2p2LastMovement = t2p2PointsNew - localData.playersByKey[t2p2Key].doubles_points;
+            var t1p1LastMovement = newt1p1 - localData.playersByKey[t1p1Key].doubles_points;
+            var t1p2LastMovement = newt1p2 - localData.playersByKey[t1p2Key].doubles_points;
+            var t2p1LastMovement = newt2p1 - localData.playersByKey[t2p1Key].doubles_points;
+            var t2p2LastMovement = newt2p2 - localData.playersByKey[t2p2Key].doubles_points;
             // Updates games won/lost
             var t1p1GamesLost = localData.playersByKey[t1p1Key].doubles_lost;
             var t1p1GamesWon = localData.playersByKey[t1p1Key].doubles_won;
@@ -993,7 +1033,7 @@
                     {
                         'player' : 't1p1',
                         'key' : t1p1Key,
-                        'pointsNew' : t1p1PointsNew,
+                        'pointsNew' : newt1p1,
                         'lastMovement' : t1p1LastMovement,
                         'gamesLost' : t1p1GamesLost,
                         'gamesWon' : t1p1GamesWon,
@@ -1009,7 +1049,7 @@
                     {
                         'player' : 't1p2',
                         'key' : t1p2Key,
-                        'pointsNew' : t1p2PointsNew,
+                        'pointsNew' : newt1p2,
                         'lastMovement' : t1p2LastMovement,
                         'gamesLost' : t1p2GamesLost,
                         'gamesWon' : t1p2GamesWon,
@@ -1025,7 +1065,7 @@
                     {
                         'player' : 't2p1',
                         'key' : t2p1Key,
-                        'pointsNew' : t2p1PointsNew,
+                        'pointsNew' : newt2p1,
                         'lastMovement' : t2p1LastMovement,
                         'gamesLost' : t2p1GamesLost,
                         'gamesWon' : t2p1GamesWon,
@@ -1041,7 +1081,7 @@
                     {
                         'player' : 't2p2',
                         'key' : t2p2Key,
-                        'pointsNew' : t2p2PointsNew,
+                        'pointsNew' : newt2p2,
                         'lastMovement' : t2p2LastMovement,
                         'gamesLost' : t2p2GamesLost,
                         'gamesWon' : t2p2GamesWon,
@@ -1065,19 +1105,16 @@
                 console.log('----');
             }
             // Save "players", and "players_game" data
-            scoringSave('t1p1', 'doubles', t1p1Key, t1p1PointsNew, t1p1LastMovement, t1p1GamesLost, t1p1GamesWon, newGameKey, t1p1Key, t1p2Key, t2p1Key, t2p2Key, t1s, t2s, t1Won);
-            scoringSave('t1p2', 'doubles', t1p2Key, t1p2PointsNew, t1p2LastMovement, t1p2GamesLost, t1p2GamesWon, newGameKey, t1p1Key, t1p2Key, t2p1Key, t2p2Key, t1s, t2s, t1Won);
-            scoringSave('t2p1', 'doubles', t2p1Key, t2p1PointsNew, t2p1LastMovement, t2p1GamesLost, t2p1GamesWon, newGameKey, t1p1Key, t1p2Key, t2p1Key, t2p2Key, t1s, t2s, t2Won);
-            scoringSave('t2p2', 'doubles', t2p2Key, t2p2PointsNew, t2p2LastMovement, t2p2GamesLost, t2p2GamesWon, newGameKey, t1p1Key, t1p2Key, t2p1Key, t2p2Key, t1s, t2s, t2Won);
+            scoringSave('t1p1', 'doubles', t1p1Key, newt1p1, t1p1LastMovement, t1p1GamesLost, t1p1GamesWon, newGameKey, t1p1Key, t1p2Key, t2p1Key, t2p2Key, t1s, t2s, t1Won);
+            scoringSave('t1p2', 'doubles', t1p2Key, newt1p2, t1p2LastMovement, t1p2GamesLost, t1p2GamesWon, newGameKey, t1p1Key, t1p2Key, t2p1Key, t2p2Key, t1s, t2s, t1Won);
+            scoringSave('t2p1', 'doubles', t2p1Key, newt2p1, t2p1LastMovement, t2p1GamesLost, t2p1GamesWon, newGameKey, t1p1Key, t1p2Key, t2p1Key, t2p2Key, t1s, t2s, t2Won);
+            scoringSave('t2p2', 'doubles', t2p2Key, newt2p2, t2p2LastMovement, t2p2GamesLost, t2p2GamesWon, newGameKey, t1p1Key, t1p2Key, t2p1Key, t2p2Key, t1s, t2s, t2Won);
             // Show doubles rankings
             activeTabToggle('doubles');
         } else { // Singles
-            // New singles player points
-            var t1p1PointsNew = t1rp / decay_factor * [decay_factor - 1] + t1p / decay_factor;
-            var t2p1PointsNew = t2rp / decay_factor * [decay_factor - 1] + t2p / decay_factor;
             // Update last movements
-            var t1p1LastMovement = t1p1PointsNew - t1rp;
-            var t2p1LastMovement = t2p1PointsNew - t2rp;
+            var t1p1LastMovement = newt1p1 - t1rp;
+            var t2p1LastMovement = newt1p2 - t2rp;
             // Updates games won/lost
             var t1p1GamesLost = localData.playersByKey[t1p1Key].singles_lost;
             var t1p1GamesWon = localData.playersByKey[t1p1Key].singles_won;
@@ -1101,7 +1138,7 @@
                     {
                         'player' : 't1p1',
                         'key' : t1p1Key,
-                        'pointsNew' : t1p1PointsNew,
+                        'pointsNew' : newt1p1,
                         'lastMovement' : t1p1LastMovement,
                         'gamesLost' : t1p1GamesLost,
                         'gamesWon' : t1p1GamesWon,
@@ -1117,7 +1154,7 @@
                     {
                         'player' : 't2p1',
                         'key' : t2p1Key,
-                        'pointsNew' : t2p1PointsNew,
+                        'pointsNew' : newt2p1,
                         'lastMovement' : t2p1LastMovement,
                         'gamesLost' : t2p1GamesLost,
                         'gamesWon' : t2p1GamesWon,
@@ -1133,8 +1170,8 @@
                 ]
             }
             // Save "players", and "players_game" data
-            scoringSave('t1p1', 'singles', t1p1Key, t1p1PointsNew, t1p1LastMovement, t1p1GamesLost, t1p1GamesWon, newGameKey, t1p1Key, '', t2p1Key, '', t1s, t2s, t1Won);
-            scoringSave('t2p1', 'singles', t2p1Key, t2p1PointsNew, t2p1LastMovement, t2p1GamesLost, t2p1GamesWon, newGameKey, t1p1Key, '', t2p1Key, '', t1s, t2s, t2Won);
+            scoringSave('t1p1', 'singles', t1p1Key, newt1p1, t1p1LastMovement, t1p1GamesLost, t1p1GamesWon, newGameKey, t1p1Key, '', t2p1Key, '', t1s, t2s, t1Won);
+            scoringSave('t2p1', 'singles', t2p1Key, newt2p1, t2p1LastMovement, t2p1GamesLost, t2p1GamesWon, newGameKey, t1p1Key, '', t2p1Key, '', t1s, t2s, t2Won);
             // Show singles rankings
             activeTabToggle('singles');
         }
@@ -1584,13 +1621,19 @@
                 dbPlayers.set({
                     "doubles_last_movement": '',
                     "doubles_lost": 0,
-                    "doubles_points": 100,
+                    "doubles_won" : 0,
+                    "doubles_points": 1200,
                     "doubles_won": 0,
+                    "doubles_goals_for": 0,
+                    "doubles_goals_against": 0,
+                    "doubles_goals_for_avg": 0,
+                    "doubles_goals_against_avg": 0,
+                    "gamesCount" : 0,
                     "dt": Date.now(),
                     "name": player,
                     "singles_last_movement": '',
                     "singles_lost": 0,
-                    "singles_points": 100,
+                    "singles_points": 1200,
                     "singles_won": 0,
                     "status": true
                 }).then(function() {
