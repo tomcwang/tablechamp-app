@@ -928,6 +928,9 @@
         else {
             var t1p1_k = localData.playersByKey[t1p1Key].singles_k_factor;
             var t2p1_k = localData.playersByKey[t2p1Key].singles_k_factor;
+            
+            t1p1_points = localData.playersByKey[t1p1Key].singles_points;
+            t2p1_points = localData.playersByKey[t2p1Key].singles_points;
         }
         // Team ranking points
         var t1rp = localData.playersByKey[t1p1Key].singles_points;
