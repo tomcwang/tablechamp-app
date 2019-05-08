@@ -861,10 +861,22 @@
 
     }
 
-    function eloProbability(p1, p2) {
+    function elo_probability(p1, p2) {
         return 1.0 * 1.0 / (1 + 1.0 * Math.pow(10, 1.0 * (p1 - p2) / 400)); 
     }
 
+    function update_k_factor(current_k, totalGames, elo_score) {
+        if(totalGames < 10) {
+            return current_k;
+        }
+        else if(elo_score > 1500) {
+            return 10;
+        }
+        else {
+            return 20;
+        }
+
+    }
     // ---------------------------------------------------
     // Scoring
     // ---------------------------------------------------
@@ -903,10 +915,19 @@
         }
         var t1p1_points = localData.playersByKey[t1p1Key].doubles_points;
         var t2p1_points = localData.playersByKey[t2p1Key].doubles_points;
-
+        
         if(isDoubles) {
             var t1p2_points = localData.playersByKey[t1p2Key].doubles_points;
             var t2p2_points = localData.playersByKey[t2p2Key].doubles_points;
+            
+            var t1p1_k = localData.playersByKey[t1p1Key].doubles_k_factor;
+            var t2p1_k = localData.playersByKey[t2p1Key].doubles_k_factor;
+            var t1p2_k = localData.playersByKey[t1p2Key].doubles_k_factor;
+            var t2p2_k = localData.playersByKey[t2p2Key].doubles_k_factor;
+        }
+        else {
+            var t1p1_k = localData.playersByKey[t1p1Key].singles_k_factor;
+            var t2p1_k = localData.playersByKey[t2p1Key].singles_k_factor;
         }
         // Team ranking points
         var t1rp = localData.playersByKey[t1p1Key].singles_points;
@@ -926,33 +947,33 @@
             console.log('----');
         }
 
-        // define k constant
-        var k = 32;
-        var prob_team1 = eloProbability(t2rp, t1rp);
-        var prob_team2 = eloProbability(t1rp, t2rp);
+        var prob_team1 = elo_probability(t2rp, t1rp);
+        var prob_team2 = elo_probability(t1rp, t2rp);
 
         if(isDoubles) {
             // team 1 wins
             if (parseInt(t1s) > parseInt(t2s)) {
-                var newt1p1 = t1p1_points+k*(1-prob_team1);
-                var newt1p2 = t1p2_points+k*(1-prob_team1);
-                var newt2p1 = t2p1_points+k*(0-prob_team2);
-                var newt2p2 = t2p2_points+k*(0-prob_team2);
+                var newt1p1 = t1p1_points+t1p1_k*(1-prob_team1);
+                var newt1p2 = t1p2_points+t1p2_k*(1-prob_team1);
+                var newt2p1 = t2p1_points+t2p1_k*(0-prob_team2);
+                var newt2p2 = t2p2_points+t2p2_k*(0-prob_team2);
             }
             else {
-                var newt1p1 = t1p1_points+k*(1-prob_team1);
-                var newt2p1 = t2p1_points+k*(0-prob_team2)
+                var newt1p1 = t1p1_points+t1p1_k*(0-prob_team1);
+                var newt1p2 = t1p2_points+t1p2_k*(0-prob_team1);
+                var newt2p1 = t2p1_points+t2p1_k*(1-prob_team2);
+                var newt2p2 = t2p2_points+t2p2_k*(1-prob_team2);
             }
         }
         else {
             // team 1 wins
             if (parseInt(t1s) > parseInt(t2s)) {
-                var newt1p1 = t1rp+k*(1-prob_team1);
-                var newt2p1 = t2rp+k*(0-prob_team2);
+                var newt1p1 = t1p1_points+t1p1_k*(1-prob_team1);
+                var newt2p1 = t2p1_points+t2p1_k*(0-prob_team2);
             }
             else {
-                var newt1p1 = t1rp+k*(0-prob_team1);
-                var newt2p1 = t2rp+k*(1-prob_team2);
+                var newt1p1 = t1p1_points+t1p1_k*(0-prob_team1);
+                var newt2p1 = t2p1_points+t2p1_k*(1-prob_team2);
             }
         }
         if (logging) {
@@ -965,7 +986,7 @@
         var gameData = {
             "dt": Date.now(),
             "t1p1_points": newt1p1,
-            "t2p1_points": newt1p2
+            "t2p1_points": newt2p1
         }
         if (logging) {
             console.log('Update ranking points');
@@ -1026,6 +1047,13 @@
                 t1p1GamesLost += 1;
                 t1p2GamesLost += 1;
             }
+
+            // update k factors for players
+            t1p1_k = update_k_factor(t1p1_k, t1p1GamesWon+t1p1GamesLost, newt1p1);
+            t2p1_k = update_k_factor(t2p1_k, t2p1GamesWon+t2p1GamesLost, newt2p1);
+            t1p2_k = update_k_factor(t1p2_k, t1p2GamesWon+t1p2GamesLost, newt1p2);
+            t2p2_k = update_k_factor(t2p2_k, t2p2GamesWon+t2p2GamesLost, newt2p2);    
+            
             // Cache last game
             lastGame.players = {
                 'type' : 'doubles',
@@ -1105,16 +1133,16 @@
                 console.log('----');
             }
             // Save "players", and "players_game" data
-            scoringSave('t1p1', 'doubles', t1p1Key, newt1p1, t1p1LastMovement, t1p1GamesLost, t1p1GamesWon, newGameKey, t1p1Key, t1p2Key, t2p1Key, t2p2Key, t1s, t2s, t1Won);
-            scoringSave('t1p2', 'doubles', t1p2Key, newt1p2, t1p2LastMovement, t1p2GamesLost, t1p2GamesWon, newGameKey, t1p1Key, t1p2Key, t2p1Key, t2p2Key, t1s, t2s, t1Won);
-            scoringSave('t2p1', 'doubles', t2p1Key, newt2p1, t2p1LastMovement, t2p1GamesLost, t2p1GamesWon, newGameKey, t1p1Key, t1p2Key, t2p1Key, t2p2Key, t1s, t2s, t2Won);
-            scoringSave('t2p2', 'doubles', t2p2Key, newt2p2, t2p2LastMovement, t2p2GamesLost, t2p2GamesWon, newGameKey, t1p1Key, t1p2Key, t2p1Key, t2p2Key, t1s, t2s, t2Won);
+            scoringSave('t1p1', 'doubles', t1p1Key, newt1p1, t1p1LastMovement, t1p1GamesLost, t1p1GamesWon, newGameKey, t1p1Key, t1p2Key, t2p1Key, t2p2Key, t1s, t2s, t1Won, t1p1_k);
+            scoringSave('t1p2', 'doubles', t1p2Key, newt1p2, t1p2LastMovement, t1p2GamesLost, t1p2GamesWon, newGameKey, t1p1Key, t1p2Key, t2p1Key, t2p2Key, t1s, t2s, t1Won, t1p2_k);
+            scoringSave('t2p1', 'doubles', t2p1Key, newt2p1, t2p1LastMovement, t2p1GamesLost, t2p1GamesWon, newGameKey, t1p1Key, t1p2Key, t2p1Key, t2p2Key, t1s, t2s, t2Won, t2p1_k);
+            scoringSave('t2p2', 'doubles', t2p2Key, newt2p2, t2p2LastMovement, t2p2GamesLost, t2p2GamesWon, newGameKey, t1p1Key, t1p2Key, t2p1Key, t2p2Key, t1s, t2s, t2Won, t2p2_k);
             // Show doubles rankings
             activeTabToggle('doubles');
         } else { // Singles
             // Update last movements
-            var t1p1LastMovement = newt1p1 - t1rp;
-            var t2p1LastMovement = newt1p2 - t2rp;
+            var t1p1LastMovement = newt1p1 - t1p1_points;
+            var t2p1LastMovement = newt2p1 - t2p1_points;
             // Updates games won/lost
             var t1p1GamesLost = localData.playersByKey[t1p1Key].singles_lost;
             var t1p1GamesWon = localData.playersByKey[t1p1Key].singles_won;
@@ -1131,6 +1159,11 @@
                 t1p1GamesLost += 1;
                 t2p1GamesWon += 1;
             }
+
+            // update k factors for players
+            t1p1_k = update_k_factor(t1p1_k, t1p1GamesWon+t1p1GamesLost, newt1p1);
+            t2p1_k = update_k_factor(t2p1_k, t2p1GamesWon+t2p1GamesLost, newt2p1);
+
             // Cache last game
             lastGame.players = {
                 'type' : 'singles',
@@ -1170,8 +1203,8 @@
                 ]
             }
             // Save "players", and "players_game" data
-            scoringSave('t1p1', 'singles', t1p1Key, newt1p1, t1p1LastMovement, t1p1GamesLost, t1p1GamesWon, newGameKey, t1p1Key, '', t2p1Key, '', t1s, t2s, t1Won);
-            scoringSave('t2p1', 'singles', t2p1Key, newt2p1, t2p1LastMovement, t2p1GamesLost, t2p1GamesWon, newGameKey, t1p1Key, '', t2p1Key, '', t1s, t2s, t2Won);
+            scoringSave('t1p1', 'singles', t1p1Key, newt1p1, t1p1LastMovement, t1p1GamesLost, t1p1GamesWon, newGameKey, t1p1Key, '', t2p1Key, '', t1s, t2s, t1Won, t1p1_k);
+            scoringSave('t2p1', 'singles', t2p1Key, newt2p1, t2p1LastMovement, t2p1GamesLost, t2p1GamesWon, newGameKey, t1p1Key, '', t2p1Key, '', t1s, t2s, t2Won, t2p1_k);
             // Show singles rankings
             activeTabToggle('singles');
         }
@@ -1246,13 +1279,14 @@
             }
         }
     }
-    function scoringSave(player, type, key, points, movement, lost, won, gameKey, t1p1Key, t1p2Key, t2p1Key, t2p2Key, t1s, t2s, wonGame) {
+    function scoringSave(player, type, key, points, movement, lost, won, gameKey, t1p1Key, t1p2Key, t2p1Key, t2p2Key, t1s, t2s, wonGame, newKFactor) {
         // Save "players" data
         var playersData = {}
             playersData[type + '_points'] = points;
             playersData[type + '_last_movement'] = movement;
             playersData[type + '_lost'] = lost;
             playersData[type + '_won'] = won;
+            playersData[type + '_k_factor'] = newKFactor;
         if (logging) {
             console.log('Save "players" data');
             console.log(playersData);
@@ -1619,6 +1653,7 @@
                 // Add new player
                 var dbPlayers = fbdb.ref('/players/' + newPlayerKey);
                 dbPlayers.set({
+                    "doubles_k_factor" : 40,
                     "doubles_last_movement": '',
                     "doubles_lost": 0,
                     "doubles_won" : 0,
@@ -1631,6 +1666,7 @@
                     "gamesCount" : 0,
                     "dt": Date.now(),
                     "name": player,
+                    "singles_k_factor" : 40,
                     "singles_last_movement": '',
                     "singles_lost": 0,
                     "singles_points": 1200,
