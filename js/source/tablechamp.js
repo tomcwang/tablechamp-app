@@ -463,8 +463,8 @@
         var doublesTopRankings = '';
         for (var i = 0; i < doublesArray.length; i++) {
             if (doublesArray[i].status) {
-                var doublesLastMovement = (doublesArray[i].doubles_last_movement) ? doublesArray[i].doubles_last_movement.toFixed(2) : '';
-                var doublesPoints = (doublesArray[i].doubles_points) ? doublesArray[i].doubles_points.toFixed(2) : '';
+                var doublesLastMovement = (doublesArray[i].doubles_last_movement) ? Math.round(parseFloat(doublesArray[i].doubles_last_movement)): '';
+                var doublesPoints = (doublesArray[i].doubles_points) ? Math.round(parseFloat(doublesArray[i].doubles_points)) : '';
                 if (i < 3) {
                     doublesTopRankings += tmpl('rankingsRow', {
                         'key': doublesArray[i].key,
@@ -682,8 +682,8 @@
         var singlesTopRankings = '';
         for (var i = 0; i < singlesArray.length; i++) {
             if (singlesArray[i].status) {
-                var singlesLastMovement = (singlesArray[i].singles_last_movement) ? singlesArray[i].singles_last_movement.toFixed(2) : '';
-                var singlesPoints = (singlesArray[i].singles_points) ? singlesArray[i].singles_points.toFixed(2) : '';
+                var singlesLastMovement = (singlesArray[i].singles_last_movement) ? Math.round(parseFloat(singlesArray[i].singles_last_movement)): '';
+                var singlesPoints = (singlesArray[i].singles_points) ? Math.round(parseFloat(singlesArray[i].singles_points)) : '';
                 if (i < 3) {
                     singlesTopRankings += tmpl('rankingsRow', {
                         'key': singlesArray[i].key,
