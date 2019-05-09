@@ -577,8 +577,8 @@
                         "t1p2" : playersGames[key].t1p2 || '',
                         "t2p1" : playersGames[key].t2p1,
                         "t2p2" : playersGames[key].t2p2 || '',
-                        "t1_points" : playersGames[key].t1_points,
-                        "t2_points" : playersGames[key].t2_points,
+                        "t1_points" : parseInt(playersGames[key].t1_points),
+                        "t2_points" : parseInt(playersGames[key].t2_points),
                         "won" : playersGames[key].won
                     });
                 }
@@ -882,8 +882,8 @@
     // ---------------------------------------------------
     function scoringAdd() {
         // Scores
-        var t1s = $('.t1-score').val();
-        var t2s = $('.t2-score').val();
+        var t1s = parseInt($('.t1-score').val());
+        var t2s = parseInt($('.t2-score').val());
         if (logging) {
             console.log('scores');
             console.log(t1s);
