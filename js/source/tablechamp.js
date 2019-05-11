@@ -950,6 +950,9 @@
             console.log('----');
         }
 
+        // close modal first so you can't easily double enter scores
+        modalHide();
+
         var prob_team1 = elo_probability(t2rp, t1rp);
         var prob_team2 = elo_probability(t1rp, t2rp);
 
@@ -988,8 +991,21 @@
         // Player ranking points
         var gameData = {
             "dt": Date.now(),
+            "t1p1_name": localData.playersByKey[t1p1Key].name,
+            "t1p1_points_old": t1p1_points,
             "t1p1_points": newt1p1,
-            "t2p1_points": newt2p1
+            "t2p1_name": localData.playersByKey[t2p1Key].name,
+            "t2p1_points_old": t2p1_points,
+            "t2p1_points": newt2p1,
+        }
+
+        if(isDoubles) {
+            gameData["t1p2_name"] = localData.playersByKey[t1p2Key].name;
+            gameData["t1p2_points_old"] = t1p2_points;
+            gameData["t1p2_points"] = newt1p2;
+            gameData["t2p2_name"] = localData.playersByKey[t2p2Key].name;
+            gameData["t2p2_points_old"] = t2p2_points;
+            gameData["t2p2_points"] = newt2p2;
         }
         if (logging) {
             console.log('Update ranking points');
@@ -1017,8 +1033,7 @@
             console.log('Reset last movements');
             console.log('----');
         }
-        // Decay factor
-        var decay_factor = 10;
+
         // New player ranking points
         if (isDoubles) {
             // Update last movements
@@ -1212,8 +1227,7 @@
             activeTabToggle('singles');
         }
         // Confirmation --------------------
-        // Close modal
-        modalHide();
+        //modalHide();
         // Add success message
         messageShow('success', i18n.app.messages.gameAdded + '! <a href="#" class="undo">' + i18n.app.messages.undo + '</a>', false);
         initUndo();
