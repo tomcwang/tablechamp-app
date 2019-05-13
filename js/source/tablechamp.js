@@ -932,6 +932,10 @@
         var t1p2Key = $('.t1-players a.selected').last().data('id');
         var t2p1Key = $('.t2-players a.selected').first().data('id');
         var t2p2Key = $('.t2-players a.selected').last().data('id');
+
+        // close modal first so you can't easily double enter scores
+        modalHide();
+        
         if (logging) {
             console.log('keys');
             console.log(t1p1Key);
@@ -986,9 +990,6 @@
             }
             console.log('----');
         }
-
-        // close modal first so you can't easily double enter scores
-        modalHide();
 
         var prob_team1 = elo_probability(t2rp, t1rp);
         var prob_team2 = elo_probability(t1rp, t2rp);
@@ -1269,9 +1270,12 @@
         messageShow('success', i18n.app.messages.gameAdded + '! <a href="#" class="undo">' + i18n.app.messages.undo + '</a>', false);
         initUndo();
     }
+
     function scoringEvents() {
         $('.score-add').off('submit').on('submit', function() {
+            alert("Adding... be paitient and don't double submit!!!");
             if (scoringValidation()) {
+                modalHide();
                 scoringAdd();
             }
             return false;
