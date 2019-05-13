@@ -470,7 +470,7 @@
                         'key': doublesArray[i].key,
                         'lastMovement': rankingMovementStyles(doublesLastMovement),
                         'name': doublesArray[i].name,
-                        'points': doublesPoints,
+                        'points': addEmojiToElo(doublesPoints),
                         'rank': doublesArray[i].doubles_rank,
                         'type': 'doubles'
                     });
@@ -479,7 +479,7 @@
                         'key': doublesArray[i].key,
                         'lastMovement': rankingMovementStyles(doublesLastMovement),
                         'name': doublesArray[i].name,
-                        'points': doublesPoints,
+                        'points': addEmojiToElo(doublesPoints),
                         'rank': doublesArray[i].doubles_rank,
                         'type': 'doubles'
                     });
@@ -676,6 +676,43 @@
             activeTabToggle('singles')
         }
     }
+    function addEmojiToElo(eloScore) {
+        var newScore;
+        if(eloScore < 1000) {
+            newScore = eloScore + "🗑️";
+        }
+        else if(eloScore <= 1050){
+            newScore = eloScore + "😲";
+        }
+        else if(eloScore <= 1100){
+            newScore = eloScore + "😐";
+        }
+        else if(eloScore < 1200){
+            newScore = eloScore + "🙃";
+        }
+        else if(eloScore <= 1250){
+            newScore = eloScore + "🙂";
+        }
+        else if(eloScore <= 1300){
+            newScore = eloScore + "🤩";
+        }
+        else if(eloScore <= 1350){
+            newScore = eloScore + "🤪";
+        }  
+        else if(eloScore <= 1400){
+            newScore = eloScore + "💣";
+        }     
+        else if(eloScore <= 1450){
+            newScore = eloScore + "🎊";
+        } 
+        else if(eloScore < 1500){
+            newScore = eloScore + "🎆";
+        }           
+        else {
+            newScore = eloScore + "👑";
+        }
+        return newScore;
+    }
     function singlesRankingsUpdate() {
         var singlesArray = localData.playersBySingles;
         var singlesRankings = '';
@@ -689,7 +726,7 @@
                         'key': singlesArray[i].key,
                         'lastMovement': rankingMovementStyles(singlesLastMovement),
                         'name': singlesArray[i].name,
-                        'points': singlesPoints,
+                        'points': addEmojiToElo(singlesPoints),
                         'rank': singlesArray[i].singles_rank,
                         'type': 'singles'
                     });
@@ -698,7 +735,7 @@
                         'key': singlesArray[i].key,
                         'lastMovement': rankingMovementStyles(singlesLastMovement),
                         'name': singlesArray[i].name,
-                        'points': singlesPoints,
+                        'points': addEmojiToElo(singlesPoints),
                         'rank': singlesArray[i].singles_rank,
                         'type': 'singles'
                     });
