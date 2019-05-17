@@ -1273,9 +1273,10 @@
 
     function scoringEvents() {
         $('.score-add').off('submit').on('submit', function() {
-            alert("Adding... be paitient and don't double submit!!!");
+            modalHide();
             if (scoringValidation()) {
                 modalHide();
+                alert("Adding... be paitient and don't double submit!!!");
                 scoringAdd();
             }
             return false;
