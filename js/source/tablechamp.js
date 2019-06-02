@@ -469,7 +469,7 @@
                     doublesTopRankings += tmpl('rankingsRow', {
                         'key': doublesArray[i].key,
                         'lastMovement': rankingMovementStyles(doublesLastMovement),
-                        'name': doublesArray[i].name,
+                        'name': (i == 0) ? "Pool God 🥇🥇🥇" : doublesArray[i].name,
                         'points': addEmojiToElo(doublesPoints),
                         'rank': doublesArray[i].doubles_rank,
                         'type': 'doubles'
@@ -726,6 +726,7 @@
                         'key': singlesArray[i].key,
                         'lastMovement': rankingMovementStyles(singlesLastMovement),
                         'name': singlesArray[i].name,
+                        'name': (i == 0) ? "Pool God 🥇🥇🥇" : singlesArray[i].name,
                         'points': addEmojiToElo(singlesPoints),
                         'rank': singlesArray[i].singles_rank,
                         'type': 'singles'
@@ -932,9 +933,6 @@
         var t1p2Key = $('.t1-players a.selected').last().data('id');
         var t2p1Key = $('.t2-players a.selected').first().data('id');
         var t2p2Key = $('.t2-players a.selected').last().data('id');
-
-        // close modal first so you can't easily double enter scores
-        modalHide();
         
         if (logging) {
             console.log('keys');
@@ -1265,7 +1263,6 @@
             activeTabToggle('singles');
         }
         // Confirmation --------------------
-        //modalHide();
         // Add success message
         messageShow('success', i18n.app.messages.gameAdded + '! <a href="#" class="undo">' + i18n.app.messages.undo + '</a>', false);
         initUndo();
@@ -1273,11 +1270,15 @@
 
     function scoringEvents() {
         $('.score-add').off('submit').on('submit', function() {
-            modalHide();
             if (scoringValidation()) {
                 modalHide();
+                // Hide loader if it's still showing
+                var loader = $('.loader');
+                loader.fadeIn("slow", scoringAdd()); 
                 alert("Adding... be paitient and don't double submit!!!");
-                scoringAdd();
+                // scoringAdd();
+                $('.app header').show();
+                loader.fadeOut();     
             }
             return false;
         });
